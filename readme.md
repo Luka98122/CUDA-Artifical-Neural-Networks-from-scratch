@@ -16,10 +16,7 @@ The project follows and expands upon the *Neural Networks from Scratch* tutorial
 
 - Fully manual forward and backward propagation
 - Dense layers, activation functions, and loss functions
-- Gradient descent optimization
 - NumPy-only implementation (no TensorFlow / PyTorch)
-- Training visualizations using Matplotlib
-
 ---
 
 ## 📦 Requirements
