@@ -2,45 +2,32 @@ import sys
 import numpy as np
 import matplotlib
 
-class Neuron():
-    def __init__(self, inputs,weights,bias):
-        """
-        Below is a manual implementation of the dot product function,
-        which can be performed with np.dot(a,b).
-        
-        output = 0
-        for i in range(len(inputs)):
-            output+=inputs[i]*weights[i]
-        output += bias
-        """
-        
-        output=np.dot(weights,inputs)+bias
-        self.output = output
+np.random.seed(0)
 
 # Constants   
-inputs = [1, 2, 3, 2.5]
-weights1 = [0.2, 0.8, -0.5, 1]
-weights2 = [0.5, -0.91, 0.26, -0.5]
-weights3 = [-0.26, -0.27, 0.17, 0.87]
-weights = [weights1,weights2,weights3]
+X = [[1, 2, 3, 2.5], 
+     [2.0,5.0, -1.0, 2.0],
+     [-1.5,2.7,3.3,-0.8]]
 
-bias1 = 2
-bias2 = 3
-bias3 = 0.5    
-biases = [bias1,bias2,bias3]
+class Neuron_Layer():
+    def __init__(self, n_inputs,n_neurons):
+        self.weights = 0.1*np.random.randn(n_inputs, n_neurons)
+        self.biases = np.zeros((1,n_neurons))
+        pass
 
-""" 
-All neurons in a layer have the same inputs (the output of the previous layer),
-but output different values because of their unique weights and biases.
-"""
+    def forward(self,inputs):
+        self.output = np.dot(inputs,self.weights)+self.biases
+        pass
 
-layer_outputs = []
-neurons = []
-for i in range(3):
-    neurons.append(Neuron(inputs,weights[i],biases[i]))
-    layer_outputs.append(neurons[-1].output)
+layer1 = Neuron_Layer(4,5) 
+layer2 = Neuron_Layer(5,2)
 
-output = np.dot(weights,inputs)+biases
-print(f"Direct np.dot(): {output}")
+# Input of layer2 has to match the output of layer1
 
-print(f"Neuron output: {layer_outputs}")
+layer1.forward(X)
+print(layer1.output)
+
+layer2.forward(layer1.output)
+print(layer2.output)
+
+# TODO: Add activation functions.
