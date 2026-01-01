@@ -47,6 +47,27 @@ class Activation_Softmax():
         normalised = exps / np.sum(exps,axis=1,keepdims=True)
         self.output = normalised
 
+# Loss can be implemented as -log(softmax_output[x]), where x is the target index of the
+# correct classification.     
+class Loss:
+    def calculate(self,output,y):
+        sample_losses = self.forward(output,y)
+        data_loss = np.mean(sample_losses)
+        return data_loss
+
+class Loss_CategoricalCrossentropy(Loss):
+    def forward(self,y_pred,y_true):
+        samples = len(y_pred)
+        y_pred_clipped = np.clip(y_pred,1e-7,1-1e-7)
+        
+        if len(y_true.shape)==1:
+            correct_confidences = y_pred_clipped[range(samples),y_true]
+        elif len(y_true.shape)==2:
+            correct_confidences = np.sum(y_pred_clipped*y_true,axis=1)
+        
+        loss = -np.log(correct_confidences)
+        return loss
+    
 
 X,Y = create_data(100,3)
 
@@ -64,5 +85,6 @@ activation2.forward(layer2.output)
 
 print(activation2.output[:5])
 
-# Loss can be implemented as -log(softmax_output[x]), where x is the target index of the
-# correct classification.
+loss_function = Loss_CategoricalCrossentropy()
+loss = loss_function.calculate(activation2.output,Y)
+print("Loss:", loss)
