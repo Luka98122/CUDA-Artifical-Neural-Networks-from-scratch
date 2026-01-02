@@ -83,6 +83,13 @@ activation1.forward(layer1.output)
 layer2.forward(activation1.output)
 activation2.forward(layer2.output)
 
+predictions = np.argmax(activation2.output,axis=1)
+
+if len(Y.shape)==2:
+    Y = np.argmax(Y,axis=1)
+accuracy = np.mean(predictions==Y)
+print(accuracy)
+
 print(activation2.output[:5])
 
 loss_function = Loss_CategoricalCrossentropy()
