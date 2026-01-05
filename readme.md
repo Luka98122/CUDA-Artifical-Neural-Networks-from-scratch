@@ -1,4 +1,4 @@
-# 🧠 Neural Networks From Scratch (NumPy)
+# Neural Networks From Scratch (NumPy)
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)
 ![NumPy](https://img.shields.io/badge/NumPy-Scientific%20Computing-orange?logo=numpy)
@@ -12,14 +12,20 @@ The project follows and expands upon the *Neural Networks from Scratch* tutorial
 
 ---
 
-## ✨ Features
+## Features
 
 - Fully manual forward and backward propagation
 - Dense layers, activation functions, and loss functions
 - NumPy-only implementation (no TensorFlow / PyTorch)
 ---
 
-## 📦 Requirements
+![Spiral Classification Demo](./demo/spiralClassification.png)
+
+---
+
+##  Requirements
 
 ```bash
 pip install numpy matplotlib
+```
+---
