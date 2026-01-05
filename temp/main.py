@@ -5,7 +5,6 @@ import math
 
 
 np.random.seed(0)
-# TODO: Re-read pages 205-221.
 # Used for sample data, loosely coppied from
 def create_data(points, classes): # Creates a dataset of spiral shaped clusters
     X = np.zeros((points * classes, 2))
@@ -60,7 +59,6 @@ class Activation_Softmax():
         self.output = normalised
     
     def backward(self,dvalues): 
-        # TODO Reread 216-225
         self.dinputs = np.empty_like(dvalues)
         
         for index, (single_output,single_dvalues) in enumerate(zip(self.output,dvalues)):
@@ -71,8 +69,6 @@ class Activation_Softmax():
                               
             # Calculate sample-wise gradient.
             self.dinputs[index] = np.dot(jacobian_matrix, single_dvalues)
-
-# TODO: Re-read pages 205-232 and summarise and explain them.
 
 
 # Loss can be implemented as -log(softmax_output[x]), where x is the target index of the
