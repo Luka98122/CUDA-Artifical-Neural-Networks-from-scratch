@@ -192,3 +192,74 @@ void dot_product_cuda(const float* h_a, const float* h_b, float* result, int n)
     cudaFree(d_b);
     cudaFree(d_partial);
 }
+
+__global__ void forward_layer_kernel(const float* input, 
+                                     const float* weights, 
+                                     const float* bias, 
+                                     float* output, 
+                                     int n_inputs, 
+                                     int n_outputs)
+{
+    int row = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < n_outputs) {
+        float sum = 0.0f;
+        
+        // Dot product of Input vector and the Weights row corresponding to this neuron
+        for (int i = 0; i < n_inputs; ++i) {
+            // Weights are assumed flattened [n_outputs * n_inputs]
+            // Accessing row 'row' and column 'i'
+            sum += weights[row * n_inputs + i] * input[i];
+        }
+
+        // Add bias and store result
+        // (Optional: You could add ReLU here: fmaxf(0.0f, sum + bias[row]))
+        output[row] = sum + bias[row]; 
+    }
+}
+
+extern "C" __declspec(dllexport)
+void forward_layer_cuda(const float* h_input, 
+                        const float* h_weights, 
+                        const float* h_bias, 
+                        float* h_output, 
+                        int n_inputs, 
+                        int n_outputs)
+{
+    cudaSetDevice(0);
+
+    // Calculate sizes
+    size_t size_in = n_inputs * sizeof(float);
+    size_t size_out = n_outputs * sizeof(float);
+    size_t size_weights = n_inputs * n_outputs * sizeof(float);
+
+    // Allocate Device Memory
+    float *d_input = nullptr, *d_weights = nullptr, *d_bias = nullptr, *d_output = nullptr;
+    
+    cudaMalloc(&d_input, size_in);
+    cudaMalloc(&d_weights, size_weights);
+    cudaMalloc(&d_bias, size_out);
+    cudaMalloc(&d_output, size_out);
+
+    // Copy Host -> Device
+    cudaMemcpy(d_input, h_input, size_in, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_weights, h_weights, size_weights, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_bias, h_bias, size_out, cudaMemcpyHostToDevice);
+
+    // Launch Configuration
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (n_outputs + threadsPerBlock - 1) / threadsPerBlock;
+
+    forward_layer_kernel<<<blocksPerGrid, threadsPerBlock>>>(d_input, d_weights, d_bias, d_output, n_inputs, n_outputs);
+    
+    cudaDeviceSynchronize();
+
+    // Copy Device -> Host
+    cudaMemcpy(h_output, d_output, size_out, cudaMemcpyDeviceToHost);
+
+    // Cleanup
+    cudaFree(d_input);
+    cudaFree(d_weights);
+    cudaFree(d_bias);
+    cudaFree(d_output);
+}
