@@ -1,4 +1,4 @@
-#include "cuda_nn.h" // Include our header
+#include "cuda_nn.h"
 #include <cuda_runtime.h>
 #include <float.h>
 
@@ -51,7 +51,7 @@ __global__ void dot_kernel(const float* a, const float* b, float* partial_sum, i
 
     sdata[tid] = (idx < n) ? a[idx] * b[idx] : 0.0f;
     __syncthreads();
-
+    //"Reduction tree", with every iteration half the array gets summed.x
     for (int s = blockDim.x / 2; s > 0; s >>= 1) {
         if (tid < s) sdata[tid] += sdata[tid + s];
         __syncthreads();
@@ -63,7 +63,6 @@ __global__ void dot_kernel(const float* a, const float* b, float* partial_sum, i
 void dot_product_cuda(const float* h_a, const float* h_b, float* result, int n)
 {
     cudaSetDevice(0);
-    if (n <= 0) { *result = 0.0f; return; }
 
     float *d_a = nullptr, *d_b = nullptr, *d_partial = nullptr;
     int blockSize = 256;
@@ -79,12 +78,14 @@ void dot_product_cuda(const float* h_a, const float* h_b, float* result, int n)
 
     dot_kernel<<<gridSize, blockSize, blockSize * sizeof(float)>>>(d_a, d_b, d_partial, n);
     cudaDeviceSynchronize();
-
+    // h_partial is the array of the sum of the products of all elements in a block
+    // so we need to add all of them together.
     float* h_partial = new float[gridSize];
     cudaMemcpy(h_partial, d_partial, gridSize * sizeof(float), cudaMemcpyDeviceToHost);
 
+    
     float sum = 0.0f;
-    for (int i = 0; i < gridSize; ++i) sum += h_partial[i];
+    for (int i = 0; i < gridSize; ++i) sum += h_partial[i]; 
     *result = sum;
 
     delete[] h_partial;
