@@ -8,6 +8,7 @@
 __global__ void forward_layer_kernel(const float* input, const float* weights, const float* bias, float* output, int n_inputs, int n_outputs)
 {
     // TODO: Implement shared memory cache
+    
     // Which output neuron this thread is responsible for
     int row = blockIdx.x * blockDim.x + threadIdx.x;
 
