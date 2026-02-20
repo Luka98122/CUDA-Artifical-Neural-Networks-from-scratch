@@ -48,3 +48,5 @@ void forward_layer_cuda(const float* h_input, const float* h_weights, const floa
 
     cudaFree(d_input); cudaFree(d_weights); cudaFree(d_bias); cudaFree(d_output);
 }
+
+

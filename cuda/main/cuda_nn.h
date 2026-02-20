@@ -16,4 +16,5 @@ CUDA_API void dot_product_cuda(const float* h_a, const float* h_b, float* result
 CUDA_API void forward_layer_cuda(const float* h_input, const float* h_weights, const float* h_bias, float* h_output, int n_inputs, int n_outputs);
 CUDA_API void argmax_cuda(const float* h_a, int* result_idx, int n);
 
+CUDA_API void relu_cuda(float* h_input, int n);
 #endif // CUDA_NN_H
