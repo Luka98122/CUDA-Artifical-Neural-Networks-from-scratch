@@ -31,3 +31,21 @@ void relu_cuda(float* h_input, int n)
 
     cudaFree(d_input);
 }
+
+void relu_cuda_100(float* h_input, int n) 
+{
+    float* d_input;
+    size_t bytes = n * sizeof(float);
+
+    cudaMalloc((void**)&d_input, bytes);
+    cudaMemcpy(d_input, h_input, bytes, cudaMemcpyHostToDevice);
+
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
+    for (int i = 0;i<100;i++){
+        ReLU_kernel<<<blocksPerGrid, threadsPerBlock>>>(d_input, n);
+    }
+    cudaMemcpy(h_input, d_input, bytes, cudaMemcpyDeviceToHost);
+
+    cudaFree(d_input);
+}
