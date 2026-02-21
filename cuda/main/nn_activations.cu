@@ -6,9 +6,12 @@
 __global__ void ReLU_kernel(float* input, int n)
 {
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    if (tid<n){
-        //fmaxf is a very optimised CUDA function, faster than doing an if here
-        input[tid] = fmaxf(0.0f, input[tid]);
+    int stride = blockDim.x * gridDim.x;
+    for (int i = tid;i<n;i+=stride){
+        if (i<n){
+            //fmaxf is a very optimised CUDA function, faster than doing an if here
+            input[i] = fmaxf(0.0f, input[i]);
+        }
     }
 } 
 
