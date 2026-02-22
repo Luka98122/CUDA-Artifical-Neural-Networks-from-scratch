@@ -23,7 +23,6 @@ __global__ void forward_layer_kernel(const float* input, const float* weights, c
 }
 
 // OOP layer
-
 class DenseLayer {
 private:
     int n_in;
@@ -117,3 +116,5 @@ void* copy_device_array_to_host(const float* d_array, int size) {
 
     return static_cast<void*>(h_array);
 }
+
+// TODO: add function to free device array

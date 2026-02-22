@@ -45,13 +45,19 @@ void mat_add_cuda(const float* h_A, const float* h_B, float* h_C, int rows, int 
 // ---------------------------
 __global__ void dot_kernel(const float* a, const float* b, float* partial_sum, int n)
 {
+    // TODO: implement this in the dense layer forward pass ( need to add bias, etc.)
     extern __shared__ float sdata[];
     int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    sdata[tid] = (idx < n) ? a[idx] * b[idx] : 0.0f;
+    if (idx<n){
+        sdata[tid]=a[idx]*b[idx];
+    }
+    else{
+        sdata[tid] = 0.0f;
+    }
     __syncthreads();
-    //"Reduction tree", with every iteration half the array gets summed.x
+    //"Reduction tree", with every iteration half the array gets summed.
     for (int s = blockDim.x / 2; s > 0; s >>= 1) {
         if (tid < s) sdata[tid] += sdata[tid + s];
         __syncthreads();
@@ -98,13 +104,13 @@ void dot_product_cuda(const float* h_a, const float* h_b, float* result, int n)
 // ---------------------------
 __global__ void argmax_kernel(const float* a, float* partial_max, int* partial_idx, int n)
 {
-    // Goal of this kernel: In a block with n threads, find the largest value and its index
+    // goal of this kernel: in a block with n threads, find the largest value and its index
     extern __shared__ float sdata[];
 
-    //stores values
+    //pointer to first half, stores values
     float* s_max_val = sdata;
 
-    //stores indexes
+    //points to second half, stores indexes
     int* s_max_idx = (int*)(s_max_val + blockDim.x);
 
     // current thread index
@@ -167,7 +173,6 @@ void argmax_cuda(const float* h_a, int* result_idx, int n)
     cudaMemcpy(d_a, h_a, n * sizeof(float), cudaMemcpyHostToDevice);
 
     size_t sharedMemSize = blockSize * sizeof(float) + blockSize * sizeof(int);
-
 
     argmax_kernel<<<gridSize, blockSize, sharedMemSize>>>(d_a, d_partial_max, d_partial_idx, n);
     
