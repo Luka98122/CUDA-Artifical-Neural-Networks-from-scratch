@@ -26,4 +26,6 @@ CUDA_API void destroy_dense_layer(void* layer_ptr);
 CUDA_API float* forward_dense_layer(void* layer_ptr, const float* d_input);
 CUDA_API void forward_dense_layer_host(void* layer_ptr, const float* h_input, float* h_output); //temporary for testing
 
+CUDA_API void* copy_array_to_device(const float* h_array, int size);
+CUDA_API void* copy_device_array_to_host(const float* d_array, int size);
 #endif // CUDA_NN_H

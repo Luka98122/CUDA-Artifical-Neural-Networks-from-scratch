@@ -103,35 +103,17 @@ void forward_dense_layer_host(void* layer_ptr, const float* h_input, float* h_ou
     layer->forward_host(h_input, h_output);
 }
 
-// Old forward layer
-
-void forward_layer_cuda(const float* h_input, const float* h_weights, const float* h_bias, float* h_output, int n_inputs, int n_outputs)
-{
-    cudaSetDevice(0);
-    size_t size_in = n_inputs * sizeof(float);
-    size_t size_out = n_outputs * sizeof(float);
-    size_t size_weights = n_inputs * n_outputs * sizeof(float);
-
-    float *d_input, *d_weights, *d_bias, *d_output;
-    cudaMalloc(&d_input, size_in);
-    cudaMalloc(&d_weights, size_weights);
-    cudaMalloc(&d_bias, size_out);
-    cudaMalloc(&d_output, size_out);
-
-    cudaMemcpy(d_input, h_input, size_in, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_weights, h_weights, size_weights, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_bias, h_bias, size_out, cudaMemcpyHostToDevice);
-
-    int threadsPerBlock = 256;
-    int blocksPerGrid = (n_outputs + threadsPerBlock - 1) / threadsPerBlock;
-
-    forward_layer_kernel<<<blocksPerGrid, threadsPerBlock>>>(d_input, d_weights, d_bias, d_output, n_inputs, n_outputs);
-    cudaDeviceSynchronize();
-
-    cudaMemcpy(h_output, d_output, size_out, cudaMemcpyDeviceToHost);
-
-    cudaFree(d_input); cudaFree(d_weights); cudaFree(d_bias); cudaFree(d_output);
+void* copy_array_to_device(const float* h_array, int size){
+    float* d_array;
+    cudaMalloc(&d_array,size*sizeof(float));
+    cudaMemcpy(d_array,h_array,size*sizeof(float),cudaMemcpyHostToDevice);
+    return static_cast<void*>(d_array);
 }
 
+void* copy_device_array_to_host(const float* d_array, int size) {
+    float* h_array = (float*)malloc(size * sizeof(float)); 
+    
+    cudaMemcpy(h_array, d_array, size * sizeof(float), cudaMemcpyDeviceToHost);
 
-
+    return static_cast<void*>(h_array);
+}
